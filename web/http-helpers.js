@@ -17,3 +17,16 @@ exports.serveAssets = function(res, asset, callback) {
 
 
 // As you progress, keep thinking about what helper functions you can put here!
+exports.renderHTML = function(res, req, site) {
+  var fixtureName = site;
+  var fixturePath = path.archivedSites + "/" + fixtureName;
+
+  fs.readFile(fixturePath, function(error, data) {
+    if (error) {
+      console.log(error);
+    }
+    var loadingPage = data;
+    res.write(loadingPage);
+    res.end();
+  });
+};
