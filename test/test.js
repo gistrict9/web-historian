@@ -1,4 +1,4 @@
-var expect = require('chai').expect;
+ var expect = require('chai').expect;
 var handler = require("../web/request-handler");
 var stubs = require("./stubs/stubs");
 var fs = require('fs');
