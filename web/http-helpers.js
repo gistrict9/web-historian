@@ -14,7 +14,18 @@ exports.serveAssets = function(res, asset, callback) {
 
 };
 
-
+exports.returnArchive = function(file, res, req){
+  fs.readFile('archives/sites/' + file, function(error, data) {
+      if (error) {
+        res.writeHead(404, {'Content-Type':'text/html'});
+        res.write('<p>404 Error: The page you are looking for does not exist.</p>');
+        res.end();
+      }
+      res.writeHead(200, {'Content-Type':'text/html'});
+      res.write(data);
+      res.end();
+    });
+};
 
 // As you progress, keep thinking about what helper functions you can put here!
 exports.renderHTML = function(res, req, site) {

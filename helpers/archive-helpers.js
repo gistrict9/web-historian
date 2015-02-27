@@ -26,7 +26,7 @@ exports.initialize = function(pathsObj){
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback){
-  fs.readFileSync('./archives/sites.txt', function(err, data){
+  fs.readFile('./archives/sites.txt', function(err, data){
     if (err){
       console.log(err);
     }
@@ -35,16 +35,15 @@ exports.readListOfUrls = function(callback){
   });
 };
 
-exports.isUrlInList = function(site){
-  // 2. Yes = Working, here is loading page
-  // 3. No = addUrlToList, here is the loading page
-  // 1. Yes = Here is the HTML
+exports.isUrlInList = function(site, req, res){
 
   exports.readListOfUrls(function(sites){
     if (_.indexOf(sites, site) === -1){
       exports.addUrlToList(site);
     }
     else {
+      //TODO: add server response with loading page
+
       console.log('readListOfUrls says: its already in the list');
     }
   });
@@ -55,6 +54,8 @@ exports.addUrlToList = function(site){
   fs.appendFile('./archives/sites.txt', site, function(err){
     if (err) throw err;
     console.log('addUrl says: It\'s saved!');
+    //update res
+    //send back res with appropriate html page
   });
 };
 
@@ -64,7 +65,7 @@ exports.isURLArchived = function(site, res, req, callback){
   fs.exists(fixturePath, function(exists){
     if (exists){
       //execute callback on fixturePath
-      renderHTML(res, req);
+      callback(site, res, req);
       console.log('isUrlArchived says: here is your file');
     }
     else {
@@ -77,6 +78,3 @@ exports.downloadUrls = function(){
   //downloads actual html when called
 };
 
-exports.caller = function(func) {
-  func();
-};
