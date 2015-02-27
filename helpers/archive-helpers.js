@@ -1,3 +1,4 @@
+var http = require("http");
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
@@ -35,27 +36,47 @@ exports.readListOfUrls = function(callback){
   });
 };
 
-exports.isUrlInList = function(site, req, res){
+exports.isUrlInList = function(site, res, req){
 
-  exports.readListOfUrls(function(sites){
-    if (_.indexOf(sites, site) === -1){
-      exports.addUrlToList(site);
-    }
-    else {
-      //TODO: add server response with loading page
+  //make callback function
+  //take result and request and return a function that
+  //takes in just sites
+  //
+  var makeCallback = function(res, req){
+    return function(sites){
+      if (_.indexOf(sites, site) === -1){
+        exports.addUrlToList(res, req, site);
+      }
+      else {
+        fs.readFile('./web/public/loading.html', function(error, data) {
+          if (error) {
+            console.log(error);
+          }
+          res.writeHead(200, {'Content-Type':'text/html'});
+          res.write(data);
+          res.end();
+        });
+      }
+    };
+  };
 
-      console.log('readListOfUrls says: its already in the list');
-    }
-  });
+  var temp = makeCallback(res, req);
+
+  exports.readListOfUrls(temp);
 };
 
-exports.addUrlToList = function(site){
+exports.addUrlToList = function(res, req, site){
   var site = site +'\n';
   fs.appendFile('./archives/sites.txt', site, function(err){
     if (err) throw err;
-    console.log('addUrl says: It\'s saved!');
-    //update res
-    //send back res with appropriate html page
+    fs.readFile('./web/public/loading.html', function(error, data) {
+      if (error) {
+        console.log(error);
+      }
+      res.writeHead(200, {'Content-Type':'text/html'});
+      res.write(data);
+      res.end();
+    });
   });
 };
 
@@ -69,12 +90,42 @@ exports.isURLArchived = function(site, res, req, callback){
       console.log('isUrlArchived says: here is your file');
     }
     else {
-      exports.isUrlInList(site);
+      exports.isUrlInList(site, res, req);
+      exports.downloadUrls(site, res, req);
     }
   });
 };
 
-exports.downloadUrls = function(){
-  //downloads actual html when called
+exports.downloadUrls = function(site, res, req){
+  var options = {
+    host: site,
+    port: 80,
+    path: '/index.html'
+  };
+
+  http.get(options, function(res) {
+    var body = '';
+
+    res.on('data', function(data) {
+      body += data;
+    });
+
+    res.on('end', function() {
+      // write body to file
+      // create a file in the sites directory
+      // open and write the body to that file
+      // close the file
+      fs.writeFile("./archives/sites/" + site, body, function(err) {
+          if(err) {
+            console.log(err);
+          } else {
+            console.log("The file was saved!");
+          }
+      });
+    });
+
+  }).on('error', function(e) {
+    console.log("Got error: " + e.message);
+  });
 };
 

@@ -59,16 +59,7 @@ exports.handleRequest = function (req, res) {
 
     req.on('end', function() {
       var url = body.split('=')[1];
-
-      fs.exists(fixturePath, function(exists){
-        if (exists){
-          archive.isURLArchived(url, res, req, httpHelpers.returnArchive);
-        }
-        else {
-
-        }
-      });
-
+      archive.isURLArchived(url, res, req, httpHelpers.returnArchive);
     });
   }
 
